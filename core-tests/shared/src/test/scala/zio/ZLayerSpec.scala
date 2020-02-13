@@ -46,6 +46,14 @@ object ZLayerSpec extends ZIOBaseSpec {
     trait Service
   }
 
+  type Module4 = Has[Module4.Service]
+
+  object Module4 {
+    trait Service
+  }
+
+  val layer4 = ZLayer.succeed(new Module4.Service {})
+
   def makeLayer3(ref: Ref[Vector[String]]): ZLayer[Any, Nothing, Module3] =
     ZLayer {
       ZManaged.make(ref.update(_ :+ "Acquiring Module 3").as(Has(new Module3.Service {})))(_ =>
@@ -220,5 +228,5 @@ object ZLayerSpec extends ZIOBaseSpec {
         actual <- ref.get
       } yield assert(actual)(equalTo(expected))
     }
-  )
+  ).provideLayer(layer4)
 }
